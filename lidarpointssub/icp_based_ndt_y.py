@@ -69,6 +69,13 @@ class NDTScanMatcher(Node):
 
     def save_o3d_to_pcd(self, pcd, filename="pointcloud.pcd"):
         """Save an Open3D point cloud to a PCD file."""
+
+        # Here I create a PCD file based on Lidar and how I saw the format of PCD in the NDT demo
+
+
+
+
+
         try:
             o3d.io.write_point_cloud(filename, pcd)
             self.get_logger().info(f"Saved point cloud to {filename}")
