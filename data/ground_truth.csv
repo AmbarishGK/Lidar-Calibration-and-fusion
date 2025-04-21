@@ -1,0 +1,10 @@
+data,source,target,x (m),y (m),z (m),roll (deg),pitch (deg),yaw (deg)
+multi_calib_dataset_6_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,-3.6,-3,0,0,0,2
+multi_calib_dataset_6_lidar,multi_calib_lidar_1_1.pcd,multi_calib_lidar_2_1.pcd,-3.6,-3,0,0,0,2
+multi_calib_dataset_4_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,-2.5,-3.2,0,0,0,15
+multi_calib_dataset_5_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,-2.9,-3.2,0,0,0,15
+multi_calib_dataset_7_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,-4.9,-1.9,0,-10,5,-15
+multi_calib_dataset_8_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,-4,-1.5,0,0,0,25
+multi_calib_dataset_9_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,-1.8,-4.1,0,0,0,70
+multi_calib_dataset_12_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,2.0,4.4,0,0,0,47
+multi_calib_dataset_14_lidar,multi_calib_lidar_1_0.pcd,multi_calib_lidar_2_0.pcd,2.8,3.3,0,0,0,-22
