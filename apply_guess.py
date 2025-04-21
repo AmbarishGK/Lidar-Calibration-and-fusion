@@ -6,7 +6,7 @@ import sys
 import os
 import csv
 
-# Global visualizer reference for signal handler
+# Global visualizer reference
 vis = None
 
 def signal_handler(sig, frame):
@@ -27,19 +27,16 @@ def euler_to_rotation_matrix_degrees(roll, pitch, yaw):
         [0, math.cos(roll), -math.sin(roll)],
         [0, math.sin(roll), math.cos(roll)]
     ])
-
     Ry = np.array([
         [math.cos(pitch), 0, math.sin(pitch)],
         [0, 1, 0],
         [-math.sin(pitch), 0, math.cos(pitch)]
     ])
-
     Rz = np.array([
         [math.cos(yaw), -math.sin(yaw), 0],
         [math.sin(yaw), math.cos(yaw), 0],
         [0, 0, 1]
     ])
-
     return Rz @ Ry @ Rx
 
 def apply_manual_transform(pcd, tx=0, ty=0, tz=0, roll=0, pitch=0, yaw=0):
@@ -59,10 +56,6 @@ def ask_and_save_ground_truth(source_path, target_path, tx, ty, tz, roll, pitch,
         print("❌ Not saving to ground truth.")
         return
 
-    # Extract dataset name (assuming it's the parent folder)
-    dataset_name = os.path.basename(os.path.dirname(source_path))
-
-    # Check if CSV exists and write header if not
     file_exists = os.path.isfile(csv_path)
     with open(csv_path, mode='a', newline='') as csvfile:
         writer = csv.writer(csvfile)
@@ -73,16 +66,48 @@ def ask_and_save_ground_truth(source_path, target_path, tx, ty, tz, roll, pitch,
                 "roll (deg)", "pitch (deg)", "yaw (deg)"
             ])
         writer.writerow([
-            "",  # leave "data" column blank
+            "",  # "data" left blank
             source_name, target_name,
             tx, ty, tz,
             roll, pitch, yaw
         ])
     print(f"✅ Ground truth saved to {csv_path}")
 
+def ask_and_save_screenshot(vis, source_path, target_path, save_dir=None,
+                             screenshot_basename=None, screenshot_postfix=None):
+    user_input = input("🖼️ Do you want to save a screenshot? (y/n): ").strip().lower()
+    if user_input != 'y':
+        print("📷 Skipping screenshot save.")
+        return
+
+    # Handle save directory
+    if save_dir and not os.path.isdir(save_dir):
+        try:
+            os.makedirs(save_dir)
+            print(f"📂 Created directory: {save_dir}")
+        except Exception as e:
+            print(f"⚠️ Could not create directory '{save_dir}', saving in current directory.")
+            save_dir = "."
+    elif not save_dir:
+        save_dir = "."
+
+    # Build file name
+    source_name = os.path.splitext(os.path.basename(source_path))[0]
+    target_name = os.path.splitext(os.path.basename(target_path))[0]
+    prefix = f"{screenshot_basename}_" if screenshot_basename else ""
+    postfix = f"_{screenshot_postfix}" if screenshot_postfix else ""
+    filename = f"{prefix}screenshot_{source_name}_vs_{target_name}{postfix}.png"
+    path = os.path.join(save_dir, filename)
+
+    vis.capture_screen_image(path)
+    print(f"✅ Screenshot saved to: {path}")
+
 def visualize_with_manual_guess(source_path, target_path,
                                  tx=0, ty=0, tz=0,
-                                 roll=0, pitch=0, yaw=0):
+                                 roll=0, pitch=0, yaw=0,
+                                 save_dir=None,
+                                 screenshot_basename=None,
+                                 screenshot_postfix=None):  # NEW PARAM
     global vis
 
     source = o3d.io.read_point_cloud(source_path)
@@ -105,23 +130,36 @@ def visualize_with_manual_guess(source_path, target_path,
         print("👀 Press Ctrl+C in terminal to exit.")
         vis.run()
     finally:
+        ask_and_save_screenshot(vis, source_path, target_path,
+                                save_dir=save_dir,
+                                screenshot_basename=screenshot_basename,
+                                screenshot_postfix=screenshot_postfix)
         vis.destroy_window()
 
-    # Ask and save to CSV
     ask_and_save_ground_truth(source_path, target_path, tx, ty, tz, roll, pitch, yaw)
 
-# Example usage
+# 🔍 Example usage
+
+source_path="./data/multi_calib_dataset_12_lidar/multi_calib_lidar_1_0.pcd"
+target_path="./data/multi_calib_dataset_12_lidar/multi_calib_lidar_2_0.pcd"
+save_dir="./data/multi_calib_dataset_12_lidar/"
+screenshot_basename="dataset12"
 visualize_with_manual_guess(
-    source_path="./data/multi_calib_dataset_14_lidar/multi_calib_lidar_1_0.pcd",  # Red
-    target_path="./data/multi_calib_dataset_14_lidar/multi_calib_lidar_2_0.pcd",  # Green
-    tx=2.8, ty=3.3, tz=0,
-    roll=0, pitch=0, yaw=-22
+    source_path=source_path,
+    target_path=target_path,
+    tx=2.0, ty=4.4, tz=0,
+    roll=0, pitch=0, yaw=47,
+    save_dir=save_dir,
+    screenshot_basename=screenshot_basename,
+    screenshot_postfix="aligned"
 )
 
-
-# visualize_with_manual_guess(
-#     source_path="./data/multi_calib_dataset_14_lidar/multi_calib_lidar_1_0.pcd",  # Red
-#     target_path="./data/multi_calib_dataset_14_lidar/multi_calib_lidar_2_0.pcd",  # Green
-#     tx=0, ty=0, tz=0,
-#     roll=0, pitch=0, yaw=0
-# )
+visualize_with_manual_guess(
+    source_path=source_path,
+    target_path=target_path,
+    tx=0, ty=0, tz=0,
+    roll=0, pitch=0, yaw=0,
+    save_dir=save_dir,
+    screenshot_basename=screenshot_basename,
+    screenshot_postfix="unaligned"
+)
